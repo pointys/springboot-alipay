@@ -4,6 +4,7 @@ import java.io.Serializable;
 
 /**
  * @Author: 韩老魔
+ * 修改版本测试类
  * @Date: 2019/6/3 0003 12:39
  */
 public class gitTest implements Serializable {
