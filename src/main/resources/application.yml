@@ -1,0 +1,19 @@
+server:
+  port: 8080
+  servlet:
+    context-path: /springboot-alipay
+spring:
+  thymeleaf:
+    prefix: classpath:/templates/
+    suffix: .html
+    mode: HTML
+    encoding: UTF-8
+    cache: false #开发环境不开缓存
+  datasource: #datasource 数据源配置
+    url: jdbc:mysql://localhost:3306/cost?useUnicode=true&amp;characterEncoding=utf-8
+    username: root
+    password: root
+    driver-class-name: com.mysql.jdbc.Driver
+
+
+

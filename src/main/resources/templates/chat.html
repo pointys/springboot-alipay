@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>WebSocket简单聊天室</title>
+    <meta charset="utf-8" name="viewport" content="width=device-width">
+    <link rel="stylesheet" th:href="@{/webjars/mdui/dist/css/mdui.css}">
+    <script th:src="@{/webjars/mdui/dist/js/mdui.js}"></script>
+
+    <script th:src="@{/webjars/jquery/jquery.min.js}"></script>
+    <script th:src="@{/webjars/sockjs-client/sockjs.min.js}"></script>
+    <script th:src="@{/webjars/stomp-websocket/stomp.min.js}"></script>
+
+
+</head>
+<body class="mdui-theme-primary-indigo mdui-theme-accent-pink">
+
+<div class="mdui-container">
+        <span class="mdui-typo-title">kicol聊天室</span>
+        <a class="mdui-btn mdui-btn-icon" th:href="@{/}"><i
+                class="mdui-icon material-icons">返回主页</i></a>
+    </div>
+</div>
+
+<div>
+    <label for="name">用户名瞎鸡巴写</label>
+    <input type="text" id="name" placeholder="用户名">
+</div>
+<div>
+    <button id="connect" type="button">连接</button>
+    <button id="disconnect" type="button" disabled="disabled">断开连接</button>
+</div>
+<div id="chat" style="display: none;">
+    <div>
+        <label for="name">请输入聊天内容</label>
+        <input type="text" id="content" placeholder="聊天内容">
+    </div>
+    <button id="send" type="button">发送</button>
+    <div id="greetings">
+        <div id="conversation" style="display: none;">群聊进行中。。。</div>
+    </div>
+</div>
+
+<script th:inline="javascript">
+    var stompClient = null;
+
+    function setConnected(connected) {
+        $("#connect").prop("disabled", connected);
+        $("#disconnect").prop("disabled", !connected);
+        if (connected) {
+            $("#conversation").show();
+            $("#chat").show();
+        } else {
+            $("#conversation").hide();
+            $("#chat").hide();
+        }
+        $("#greetings").html("");
+    }
+
+
+    function connect() {
+        if (!$("#name").val()) {
+            return;
+        }
+
+        var socket = new SockJS('/springboot-alipay/chat');
+        stompClient = Stomp.over(socket);
+        stompClient.connect({}, function (frame) {
+            setConnected(true);
+            stompClient.subscribe('/topic/greetings', function (greetings) {
+                showGreeting(JSON.parse(greetings.body));
+            });
+        });
+    }
+
+    function disconnect() {
+        if (stompClient !== null) {
+            stompClient.disconnect();
+        }
+        setConnected(false);
+    }
+
+    function sendname() {
+        stompClient.send("/app/hello", {},
+            JSON.stringify({'name': $("#name").val(), 'content': $("#content").val()}));
+    }
+
+    function showGreeting(message) {
+        $("#greetings")
+            .append("<div>" + message.name + ":" + message.content + "</div>");
+    }
+
+    $(function () {
+        $("#connect").click(function () {
+            connect();
+        });
+        $("#disconnect").click(function () {
+            disconnect();
+        });
+        $("#send").click(function () {
+            sendname();
+        });
+    });
+</script>
+</body>
+</html>
